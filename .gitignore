@@ -1,2 +1,5 @@
 .gradle
 .idea
+build
+
+api_info.txt
