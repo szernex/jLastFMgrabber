@@ -11,9 +11,14 @@ import java.util.Iterator;
 
 public class TrackUpdater {
 	private Track previousTrack;
+	private String nowPlaying = "";
 
 	public TrackUpdater() {
 
+	}
+
+	public String getNowPlaying() {
+		return nowPlaying;
 	}
 
 	public boolean updateNowPlaying(PaginatedResult<Track> result, Path file, String format) {
@@ -33,6 +38,7 @@ public class TrackUpdater {
 			output = formatTrack(format, current_track);
 
 		System.out.println("- " + output);
+		nowPlaying = output;
 
 		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
 			writer.write(output);

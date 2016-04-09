@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class ConfigHelper {
-	public static Map<String, String> getConfig(Path path) throws IOException {
+	public static Map<String, String> loadConfig(Path path) throws IOException {
 		if (!Files.exists(path))
 			Files.createFile(path);
 
