@@ -12,14 +12,18 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class TrayIconJLFMG implements ActionListener {
+public class TrayIconJLFMG extends TimerTask implements ActionListener {
 	private MenuItem itemCurrentTrack;
 	private SystemTray systemTray;
 	private TrayIcon trayIcon;
 
 	private TrackUpdater trackUpdater = new TrackUpdater();
 	private HashMap<String, String> config = new HashMap<>();
+
+	private Timer timer;
 
 	public TrayIconJLFMG() {
 		if (!loadConfig())
@@ -30,8 +34,9 @@ public class TrayIconJLFMG implements ActionListener {
 			exit(1);
 		}
 
-		final PopupMenu popup = new PopupMenu();
+		PopupMenu popup = new PopupMenu();
 		trayIcon = new TrayIcon(createImage("images/tray.png", "tray icon"));
+		trayIcon.setImageAutoSize(true);
 		systemTray = SystemTray.getSystemTray();
 
 		itemCurrentTrack = new MenuItem("");
@@ -59,6 +64,12 @@ public class TrayIconJLFMG implements ActionListener {
 		item_reload.addActionListener(this);
 		item_exit.addActionListener(this);
 
+		timer = new Timer();
+		timer.schedule(this, 0, R.REFRESH_DELAY);
+	}
+
+	@Override
+	public void run() {
 		refresh();
 	}
 
@@ -67,17 +78,21 @@ public class TrayIconJLFMG implements ActionListener {
 		MenuItem item = (MenuItem) e.getSource();
 		String label = item.getLabel().toLowerCase();
 
-		if (label.equals("reload config")) {
-			loadConfig();
-			refresh();
-		} else if (label.equals("refresh")) {
-			refresh();
-		} else if (label.equals("exit")) {
-			exit(0);
+		switch (label) {
+			case "reload config":
+				loadConfig();
+				refresh();
+				break;
+			case "refresh":
+				refresh();
+				break;
+			case "exit":
+				exit(0);
+				break;
 		}
 	}
 
-	protected static Image createImage(String path, String description) {
+	private Image createImage(String path, String description) {
 		URL image_url = ClassLoader.getSystemResource(path);
 
 		System.out.println(image_url);
@@ -126,6 +141,8 @@ public class TrayIconJLFMG implements ActionListener {
 	}
 
 	private void exit(int status) {
+		timer.cancel();
+
 		systemTray.remove(trayIcon);
 		System.exit(status);
 	}

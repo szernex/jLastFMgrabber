@@ -7,7 +7,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 
 public class TrackUpdater {
 	private Track previousTrack;
@@ -23,6 +22,9 @@ public class TrackUpdater {
 
 	public boolean updateNowPlaying(PaginatedResult<Track> result, Path file, String format) {
 		Track current_track = getCurrentTrack(result);
+
+		if (previousTrack == null && current_track == null)
+			return false;
 
 		if (compareTracks(current_track, previousTrack))
 			return false;
@@ -67,11 +69,7 @@ public class TrackUpdater {
 		if (result == null)
 			return null;
 
-		Iterator<Track> iterator = result.iterator();
-
-		while (iterator.hasNext()) {
-			Track track = iterator.next();
-
+		for (Track track : result) {
 			if (track.isNowPlaying())
 				return track;
 		}
