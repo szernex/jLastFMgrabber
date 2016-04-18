@@ -1,3 +1,27 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 Szernex
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
+
 package org.szernex.java.jlastfmgrabber;
 
 import de.umass.lastfm.PaginatedResult;
@@ -7,6 +31,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 public class TrackUpdater {
 	private Track previousTrack;
@@ -20,31 +46,36 @@ public class TrackUpdater {
 		return nowPlaying;
 	}
 
-	public boolean updateNowPlaying(PaginatedResult<Track> result, Path file, String format) {
+	public void updateNowPlaying(PaginatedResult<Track> result, List<OutputObject> outputs) {
 		Track current_track = getCurrentTrack(result);
 
 		if (previousTrack == null && current_track == null)
-			return false;
+			return;
 
 		if (compareTracks(current_track, previousTrack))
-			return false;
+			return;
 
+		outputs.forEach(o -> writeFile(current_track, Paths.get(o.file), o.format));
+
+		previousTrack = current_track;
+	}
+
+	private boolean writeFile(Track track, Path file, String format) {
 		if (format == null)
-			format = "$artist - $track";
+			format = R.DEFAULT_FORMAT;
 
 		String output;
 
-		if (current_track == null)
+		if (track == null)
 			output = "";
 		else
-			output = formatTrack(format, current_track);
+			output = formatTrack(format, track);
 
 		System.out.println("- " + output);
-		nowPlaying = output;
+		nowPlaying = formatTrack(R.DEFAULT_FORMAT, track);
 
 		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
 			writer.write(output);
-			previousTrack = current_track;
 
 			return true;
 		} catch (IOException ex) {
