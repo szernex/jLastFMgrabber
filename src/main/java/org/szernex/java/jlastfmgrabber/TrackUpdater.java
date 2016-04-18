@@ -31,6 +31,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 public class TrackUpdater {
 	private Track previousTrack;
@@ -44,31 +46,36 @@ public class TrackUpdater {
 		return nowPlaying;
 	}
 
-	public boolean updateNowPlaying(PaginatedResult<Track> result, Path file, String format) {
+	public void updateNowPlaying(PaginatedResult<Track> result, List<OutputObject> outputs) {
 		Track current_track = getCurrentTrack(result);
 
 		if (previousTrack == null && current_track == null)
-			return false;
+			return;
 
 		if (compareTracks(current_track, previousTrack))
-			return false;
+			return;
 
+		outputs.forEach(o -> writeFile(current_track, Paths.get(o.file), o.format));
+
+		previousTrack = current_track;
+	}
+
+	private boolean writeFile(Track track, Path file, String format) {
 		if (format == null)
-			format = "$artist - $track";
+			format = R.DEFAULT_FORMAT;
 
 		String output;
 
-		if (current_track == null)
+		if (track == null)
 			output = "";
 		else
-			output = formatTrack(format, current_track);
+			output = formatTrack(format, track);
 
 		System.out.println("- " + output);
-		nowPlaying = output;
+		nowPlaying = formatTrack(R.DEFAULT_FORMAT, track);
 
 		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
 			writer.write(output);
-			previousTrack = current_track;
 
 			return true;
 		} catch (IOException ex) {
