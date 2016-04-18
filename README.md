@@ -21,6 +21,25 @@ Configuration values are:
       * $track
       * $album
 
+An example config could look like this:<br>
+
+```json
+{
+  "user": "szernex",
+  "api_key": "xxx",
+  "outputs": [
+    {
+      "file": "now_playing_short.txt",
+      "format": "$artist - $track"
+    },
+    {
+      "file": "now_playing_long.txt",
+      "format": "Now playing: $artist - $track [$album]"
+    }
+  ]
+}
+```
+
 After you run the application you can access it via the System Tray icon. There is no GUI apart from the Tray Icon.
 
 ## Functionality
