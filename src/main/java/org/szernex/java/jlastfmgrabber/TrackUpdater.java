@@ -58,6 +58,11 @@ public class TrackUpdater {
 		outputs.forEach(o -> writeFile(current_track, Paths.get(o.file), o.format));
 
 		previousTrack = current_track;
+
+		if (current_track == null)
+			nowPlaying = "";
+		else
+			nowPlaying = formatTrack(R.DEFAULT_FORMAT, current_track);
 	}
 
 	private boolean writeFile(Track track, Path file, String format) {
@@ -70,9 +75,6 @@ public class TrackUpdater {
 			output = "";
 		else
 			output = formatTrack(format, track);
-
-		System.out.println("- " + output);
-		nowPlaying = formatTrack(R.DEFAULT_FORMAT, track);
 
 		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
 			writer.write(output);
